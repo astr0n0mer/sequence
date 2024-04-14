@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useState } from "react";
-import { Team } from "../App";
+import { Team } from "../../../common/types";
 import IndividualForm from "./IndividualForm";
 import TeamForm from "./TeamForm";
 

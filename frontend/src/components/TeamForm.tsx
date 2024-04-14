@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useRef, useState } from "react";
-import { Player, Team } from "../App";
+import { Player, Team } from "../../../common/types";
 
 export type TeamFormProps = {
   numberOfTeams: number | null;
@@ -32,12 +32,14 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
     .map((_, index) => ({
       id: (index + ++playerIdRef.current).toString(),
       name: `Player ${index + 1}`,
+      cards: [],
     }));
 
   console.table(localTeams);
 
   const validateSubmittedForm = () => {};
 
+  // @ts-ignore
   const handleFormSubmit = (event) => {
     event.preventDefault();
     // console.info(event);
@@ -57,8 +59,10 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
         name: playerName,
       };
 
+      // @ts-ignore
       if (!map.hasOwnProperty(teamId)) map[teamId] = [];
 
+      // @ts-ignore
       map[teamId].push(player);
       // if (map.hasOwnProperty(teamId)) {
       // } else {
@@ -72,6 +76,7 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
         id: team.id,
         name: formData.get(`team-${team.id}-name`) as string,
         chipColor: formData.get(`team-${team.id}-chip-color`) as string,
+        // @ts-ignore
         players: teamIdToPlayersMap[team.id],
       };
       return finalTeam;

@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useRef } from "react";
-import { Team } from "../App";
+import { Team } from "../../../common/types";
 
 export type IndividualFormProps = {
   numberOfPlayers: number | null;
@@ -18,6 +18,7 @@ export const IndividualForm: FC<IndividualFormProps> = ({
     .map((_, index) => ({
       id: (index + ++playerIdRef.current).toString(),
       name: `Player ${index + 1}`,
+      cards: [],
       // chipColor is derived using the unix timestamp in milliseconds but subtracting ${index} days from it
       chipColor:
         "#" + (Date.now() - index * 24 * 60 * 60 * 1000).toString(16).slice(-6),
@@ -26,6 +27,7 @@ export const IndividualForm: FC<IndividualFormProps> = ({
   //   console.info({ numberOfPlayers, playerIds: localPlayers });
   //   console.table(localPlayers);
 
+  // @ts-ignore
   const handleFormSubmit = (event) => {
     event.preventDefault();
     // console.info(event);

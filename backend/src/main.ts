@@ -1,11 +1,33 @@
+import cors from "cors";
 import express, { Request, Response } from "express";
+import { Dealer } from "./dealer";
 
 // Create Express server
 const app = express();
 
-// Define a GET route
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World! How are you");
+const corsOptions = {
+  origin: "*",
+  methods: "GET,POST",
+  allowedHeaders: "Content-Type,Authorization",
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+const dealer = new Dealer();
+
+app.get("/v1/games", (req: Request, res: Response) => {
+  const response = {
+    message: "Hello, World! How are you",
+  };
+  // console.log(req.body);
+  res.json(response);
+});
+
+app.post("/v1/games", (req: Request, res: Response) => {
+  console.log(req.body);
+  const teams = req.body.teams;
+  const game = dealer.startNewGame(teams);
+  res.json(game);
 });
 
 // Define the port to run the server on
