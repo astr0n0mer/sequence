@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { Dispatch, FC, SetStateAction } from "react";
 // import deckFolder from "../assets/deck";
 import styled from "styled-components";
 import "../App.css";
@@ -34,6 +34,7 @@ const StyledBoard = styled.main`
 
 type StyledButtonProps = {
   $isPlayerCard: boolean;
+  $chipColor: string | undefined;
 };
 
 const StyledButton = styled.button<StyledButtonProps>`
@@ -48,8 +49,8 @@ const StyledButton = styled.button<StyledButtonProps>`
   margin-bottom: -4px;
   //   height: calc(100% - 4px);
 
-  outline: ${({ $isPlayerCard }) =>
-    $isPlayerCard ? "4px solid magenta" : "unset"};
+  outline: ${({ $isPlayerCard, $chipColor }) =>
+    $isPlayerCard && !$chipColor ? `4px solid magenta` : "unset"};
 `;
 
 const CardImg = styled.img`
@@ -94,10 +95,17 @@ const Chip = styled.div`
 
 export type BoardProps = {
   board: CardOnBoard[];
+  setBoard: Dispatch<SetStateAction<CardOnBoard[]>>;
   playerCards: Card[];
+  chipColor: string;
 };
 
-export const Board: FC<BoardProps> = ({ board, playerCards }) => {
+export const Board: FC<BoardProps> = ({
+  board,
+  setBoard,
+  playerCards,
+  chipColor,
+}) => {
   // console.count("rendering board");
   // console.info(board);
 
@@ -125,36 +133,61 @@ export const Board: FC<BoardProps> = ({ board, playerCards }) => {
   // console.table(deck.getCards());
   // }, []);
 
+  const handleCardOnBoardClick = ({
+    value,
+    suit,
+  }: {
+    value: string;
+    suit: string;
+  }) => {
+    setBoard((prevBoard) =>
+      prevBoard.map((card) => ({
+        ...card,
+        chipColor:
+          card.value === value && card.suit === suit
+            ? chipColor
+            : card.chipColor,
+      }))
+    );
+  };
+
   return (
     <StyledBoard className="board">
-      {board.map((card, index) => (
-        <StyledButton
-          key={index}
-          data-value={card.value}
-          data-suit={card.suit}
-          onClick={() => console.info(card)}
-          $isPlayerCard={playerCards.some(
-            (playerCard) =>
-              playerCard.value === card.value && playerCard.suit === card.suit
-          )}
-        >
-          <CardImg
-            src={
-              card.value === "*"
-                ? "./src/assets/deck/black_joker.svg"
-                : `./src/assets/deck/${card.value}_of_${card.suit}${
-                    ["king", "queen", "jack"].includes(card.value) ? "2" : ""
-                  }.svg`
-              // : `./src/assets/deck/${card.value}_of_${card.suit}.svg`
+      {board.map((card, index) => {
+        const isPlayerCard = playerCards.some(
+          (playerCard) =>
+            playerCard.value === card.value && playerCard.suit === card.suit
+        );
+
+        return (
+          <StyledButton
+            key={index}
+            data-value={card.value}
+            data-suit={card.suit}
+            onClick={
+              isPlayerCard ? () => handleCardOnBoardClick(card) : undefined
             }
-            alt={`${card.value}_of_${card.suit}`}
-          />
-          <ChipContainer>
-            {/* // TODO: need one more prop below for chipCircleCount */}
-            <Chip color={card.chipColor} />
-          </ChipContainer>
-        </StyledButton>
-      ))}
+            $isPlayerCard={isPlayerCard}
+            $chipColor={card.chipColor}
+          >
+            <CardImg
+              src={
+                card.value === "*"
+                  ? "./src/assets/deck/black_joker.svg"
+                  : `./src/assets/deck/${card.value}_of_${card.suit}${
+                      ["king", "queen", "jack"].includes(card.value) ? "2" : ""
+                    }.svg`
+                // : `./src/assets/deck/${card.value}_of_${card.suit}.svg`
+              }
+              alt={`${card.value}_of_${card.suit}`}
+            />
+            <ChipContainer>
+              {/* // TODO: need one more prop below for chipCircleCount */}
+              <Chip color={card.chipColor} />
+            </ChipContainer>
+          </StyledButton>
+        );
+      })}
     </StyledBoard>
   );
 };

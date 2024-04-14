@@ -18,10 +18,9 @@ export class Dealer {
   private static gameId = 1;
 
   public startNewGame = (teams: Team[]) => {
-    const deckForBoard = new Deck(excludeList);
-    const newBoard: CardOnBoard[] = deckForBoard
+    const newBoard: CardOnBoard[] = new Deck(excludeList)
       .getCards()
-      .concat(deckForBoard.shuffle())
+      .concat(new Deck(excludeList).getCards())
       .map((card) => ({ ...card, chipColor: undefined }));
 
     const wildCard: CardOnBoard = { value: "*", suit: "*", chipColor: "*" };

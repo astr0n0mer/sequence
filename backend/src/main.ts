@@ -24,8 +24,9 @@ app.get("/v1/games", (req: Request, res: Response) => {
 });
 
 app.post("/v1/games", (req: Request, res: Response) => {
-  console.log(req.body);
   const teams = req.body.teams;
+  console.log(teams);
+  for (let team of teams) for (let player of team.players) console.log(player);
   const game = dealer.startNewGame(teams);
   res.json(game);
 });

@@ -25,3 +25,6 @@ dist-ssr
 
 *.svg
 *.zip
+
+# Environment
+.env

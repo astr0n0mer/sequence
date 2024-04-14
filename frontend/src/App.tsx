@@ -10,13 +10,14 @@ enum Screen {
   BOARD,
 }
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_SEQUENCE_API_URL;
 
 function App() {
   const [gameStatus, setGameStatus] = useState(Screen.MENU);
   const [teams, setTeams] = useState<Team[]>([]);
   const [board, setBoard] = useState<CardOnBoard[]>([]);
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
+  const [chipColor, setChipColor] = useState<string>("");
 
   const startNewGame = async () => {
     const response = await fetch(`${API_URL}/v1/games`, {
@@ -31,6 +32,7 @@ function App() {
 
     setBoard(() => data.board);
     setPlayerCards(() => data.teams[0].players[0].cards);
+    setChipColor(() => teams[0].chipColor);
     setGameStatus(() => Screen.BOARD);
   };
 
@@ -49,7 +51,12 @@ function App() {
     } else if (gameStatus === Screen.BOARD) {
       return (
         <>
-          <Board board={board} playerCards={playerCards} />
+          <Board
+            board={board}
+            setBoard={setBoard}
+            playerCards={playerCards}
+            chipColor={chipColor}
+          />
           <Hand cards={playerCards} />
         </>
       );

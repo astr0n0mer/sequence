@@ -55,7 +55,7 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
       ) as string;
 
       const player = {
-        id: localPlayer.id,
+        ...localPlayer,
         name: playerName,
       };
 
