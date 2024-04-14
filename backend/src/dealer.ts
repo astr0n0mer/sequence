@@ -2,6 +2,7 @@ import { Deck } from "../../common/deck";
 import { Card, CardOnBoard, Team } from "../../common/types";
 
 type Game = {
+  gameId: string;
   deck: Deck;
   board: Card[];
   teams: Team[];
@@ -41,12 +42,14 @@ export class Dealer {
     }
 
     const newGame: Game = {
+      gameId: Dealer.gameId.toString(),
       deck: deckWithDealer,
       board: newBoard,
       teams: teams,
     };
     // @ts-ignore
     this.games[Dealer.gameId.toString()] = newGame;
+    Dealer.gameId++;
 
     return newGame;
   };

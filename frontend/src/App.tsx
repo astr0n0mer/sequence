@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Team } from "../../common/types";
+import { Card, CardOnBoard, Team } from "../../common/types";
 import "./App.css";
 import Board from "./components/Board";
 import Form from "./components/Form";
+import { Hand } from "./components/Hand";
 
 enum Screen {
   MENU,
@@ -14,6 +15,8 @@ const API_URL = "http://localhost:3000";
 function App() {
   const [gameStatus, setGameStatus] = useState(Screen.MENU);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [board, setBoard] = useState<CardOnBoard[]>([]);
+  const [playerCards, setPlayerCards] = useState<Card[]>([]);
 
   const startNewGame = async () => {
     const response = await fetch(`${API_URL}/v1/games`, {
@@ -22,8 +25,13 @@ function App() {
       headers: { "Content-Type": "application/json" },
     });
     const data = await response.json();
-    console.info(data);
-    setGameStatus(Screen.BOARD);
+
+    console.info(data.board);
+    console.info(data.teams);
+
+    setBoard(() => data.board);
+    setPlayerCards(() => data.teams[0].players[0].cards);
+    setGameStatus(() => Screen.BOARD);
   };
 
   useEffect(() => {
@@ -39,7 +47,12 @@ function App() {
     if (gameStatus === Screen.MENU) {
       return <Form setTeams={setTeams} />;
     } else if (gameStatus === Screen.BOARD) {
-      return <Board />;
+      return (
+        <>
+          <Board board={board} playerCards={playerCards} />
+          <Hand cards={playerCards} />
+        </>
+      );
     } else {
       return (
         <h3>

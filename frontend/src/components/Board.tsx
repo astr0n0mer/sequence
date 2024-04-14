@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { FC } from "react";
 // import deckFolder from "../assets/deck";
 import styled from "styled-components";
 import "../App.css";
@@ -22,7 +22,8 @@ const wildCardChipColor = `
 const StyledBoard = styled.main`
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  gap: 2px;
+  gap: 4px;
+  padding: 4px;
 
   overflow-y: scroll;
   width: min(95%, 678px);
@@ -31,7 +32,11 @@ const StyledBoard = styled.main`
   //   background-color: grey;
 `;
 
-const StyledButton = styled.button`
+type StyledButtonProps = {
+  $isPlayerCard: boolean;
+};
+
+const StyledButton = styled.button<StyledButtonProps>`
   all: unset;
 
   position: relative;
@@ -42,6 +47,9 @@ const StyledButton = styled.button`
   // TODO: need to figure out why this is needed, since without it, there is extra space between grid items
   margin-bottom: -4px;
   //   height: calc(100% - 4px);
+
+  outline: ${({ $isPlayerCard }) =>
+    $isPlayerCard ? "4px solid magenta" : "unset"};
 `;
 
 const CardImg = styled.img`
@@ -84,48 +92,60 @@ const Chip = styled.div`
   }}
 `;
 
-export const Board = () => {
-  const [deck, setDeck] = useState(() => new Deck(excludeList));
-  const [doubleCards, setDoubleCards] = useState(() => {
-    const doubleCards: CardOnBoard[] = deck
-      .getCards()
-      .concat(deck.shuffle())
-      .map((card) => ({ ...card, chipColor: undefined }));
+export type BoardProps = {
+  board: CardOnBoard[];
+  playerCards: Card[];
+};
 
-    const wildCard: CardOnBoard = { value: "*", suit: "*", chipColor: "*" };
-    doubleCards.splice(0, 0, wildCard);
-    doubleCards.splice(9, 0, wildCard);
-    doubleCards.splice(90, 0, wildCard);
-    doubleCards.splice(99, 0, wildCard);
+export const Board: FC<BoardProps> = ({ board, playerCards }) => {
+  // console.count("rendering board");
+  // console.info(board);
 
-    // TODO: remove these later
-    doubleCards[1].chipColor = "red";
-    doubleCards[2].chipColor = "green";
-    doubleCards[3].chipColor = "yellow";
-    return doubleCards;
-  });
+  // const [deck, setDeck] = useState(() => new Deck(excludeList));
+  // const [doubleCards, setDoubleCards] = useState(() => {
+  //   const doubleCards: CardOnBoard[] = deck
+  //     .getCards()
+  //     .concat(deck.shuffle())
+  //     .map((card) => ({ ...card, chipColor: undefined }));
 
-  useEffect(() => {
-    // console.table(deck.getCards());
-  }, []);
+  //   const wildCard: CardOnBoard = { value: "*", suit: "*", chipColor: "*" };
+  //   doubleCards.splice(0, 0, wildCard);
+  //   doubleCards.splice(9, 0, wildCard);
+  //   doubleCards.splice(90, 0, wildCard);
+  //   doubleCards.splice(99, 0, wildCard);
+
+  //   // TODO: remove these later
+  //   doubleCards[1].chipColor = "red";
+  //   doubleCards[2].chipColor = "green";
+  //   doubleCards[3].chipColor = "yellow";
+  //   return doubleCards;
+  // });
+
+  // useEffect(() => {
+  // console.table(deck.getCards());
+  // }, []);
 
   return (
     <StyledBoard className="board">
-      {doubleCards.map((card, index) => (
+      {board.map((card, index) => (
         <StyledButton
           key={index}
           data-value={card.value}
           data-suit={card.suit}
           onClick={() => console.info(card)}
+          $isPlayerCard={playerCards.some(
+            (playerCard) =>
+              playerCard.value === card.value && playerCard.suit === card.suit
+          )}
         >
           <CardImg
-            // src={`./src/assets/deck/${card.value}_of_${card.suit}${
-            //   ["king", "queen", "jack"].includes(card.value) ? "2" : ""
-            // }.svg`}
             src={
               card.value === "*"
                 ? "./src/assets/deck/black_joker.svg"
-                : `./src/assets/deck/${card.value}_of_${card.suit}.svg`
+                : `./src/assets/deck/${card.value}_of_${card.suit}${
+                    ["king", "queen", "jack"].includes(card.value) ? "2" : ""
+                  }.svg`
+              // : `./src/assets/deck/${card.value}_of_${card.suit}.svg`
             }
             alt={`${card.value}_of_${card.suit}`}
           />
