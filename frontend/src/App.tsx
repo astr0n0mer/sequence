@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import Board from "./components/Board";
 import Form from "./components/Form";
@@ -17,6 +17,12 @@ export type Team = {
 
 function App() {
   const [teams, setTeams] = useState<Team[]>([]);
+
+  useEffect(() => {
+    console.count("Teams changed");
+    console.info("Teams changed");
+    console.table(teams);
+  }, [teams]);
 
   return (
     <>
