@@ -1,12 +1,10 @@
 import { Dispatch, FC, SetStateAction } from "react";
 // import deckFolder from "../assets/deck";
 import styled from "styled-components";
+import { CardOnBoard } from "../../../common/types";
 import "../App.css";
-import { Card, Deck } from "../services/deck";
+import { Card } from "../services/deck";
 
-type CardOnBoard = Card & { chipColor: string | undefined };
-
-const excludeList: Card[] = Deck.suits.map((suit) => ({ value: "jack", suit }));
 const wildCardChipColor = `
     conic-gradient(
         hsl(0, 100%, 50%),
@@ -29,6 +27,13 @@ const StyledBoard = styled.main`
   width: min(95%, 678px);
   max-height: 90vh;
 
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+    rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+    rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+
+  box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px,
+    rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
+
   //   background-color: grey;
 `;
 
@@ -37,7 +42,7 @@ type StyledButtonProps = {
   $chipColor: string | undefined;
 };
 
-const StyledButton = styled.button<StyledButtonProps>`
+const StyledButton = styled.div<StyledButtonProps>`
   all: unset;
 
   position: relative;
@@ -50,7 +55,7 @@ const StyledButton = styled.button<StyledButtonProps>`
   //   height: calc(100% - 4px);
 
   outline: ${({ $isPlayerCard, $chipColor }) =>
-    $isPlayerCard && !$chipColor ? `4px solid magenta` : "unset"};
+    $isPlayerCard && !$chipColor ? `4px solid #3688ed` : "unset"};
 `;
 
 const CardImg = styled.img`
@@ -106,45 +111,12 @@ export const Board: FC<BoardProps> = ({
   playerCards,
   chipColor,
 }) => {
-  // console.count("rendering board");
-  // console.info(board);
-
-  // const [deck, setDeck] = useState(() => new Deck(excludeList));
-  // const [doubleCards, setDoubleCards] = useState(() => {
-  //   const doubleCards: CardOnBoard[] = deck
-  //     .getCards()
-  //     .concat(deck.shuffle())
-  //     .map((card) => ({ ...card, chipColor: undefined }));
-
-  //   const wildCard: CardOnBoard = { value: "*", suit: "*", chipColor: "*" };
-  //   doubleCards.splice(0, 0, wildCard);
-  //   doubleCards.splice(9, 0, wildCard);
-  //   doubleCards.splice(90, 0, wildCard);
-  //   doubleCards.splice(99, 0, wildCard);
-
-  //   // TODO: remove these later
-  //   doubleCards[1].chipColor = "red";
-  //   doubleCards[2].chipColor = "green";
-  //   doubleCards[3].chipColor = "yellow";
-  //   return doubleCards;
-  // });
-
-  // useEffect(() => {
-  // console.table(deck.getCards());
-  // }, []);
-
-  const handleCardOnBoardClick = ({
-    value,
-    suit,
-  }: {
-    value: string;
-    suit: string;
-  }) => {
+  const handleCardOnBoardClick = ({ value, suit, index }: CardOnBoard) => {
     setBoard((prevBoard) =>
       prevBoard.map((card) => ({
         ...card,
         chipColor:
-          card.value === value && card.suit === suit
+          card.index === index && card.value === value && card.suit === suit
             ? chipColor
             : card.chipColor,
       }))

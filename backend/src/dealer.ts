@@ -21,13 +21,16 @@ export class Dealer {
     const newBoard: CardOnBoard[] = new Deck(excludeList)
       .getCards()
       .concat(new Deck(excludeList).getCards())
-      .map((card) => ({ ...card, chipColor: undefined }));
+      .map((card, index) => ({ ...card, index, chipColor: undefined }));
 
-    const wildCard: CardOnBoard = { value: "*", suit: "*", chipColor: "*" };
-    newBoard.splice(0, 0, wildCard);
-    newBoard.splice(9, 0, wildCard);
-    newBoard.splice(90, 0, wildCard);
-    newBoard.splice(99, 0, wildCard);
+    for (let i of [0, 9, 90, 99]) {
+      newBoard.splice(i, 0, {
+        value: "*",
+        suit: "*",
+        index: i,
+        chipColor: "*",
+      });
+    }
 
     const deckWithDealer = new Deck();
 

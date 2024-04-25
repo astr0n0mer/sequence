@@ -3,7 +3,7 @@ import { Card, CardOnBoard, Team } from "../../common/types";
 import "./App.css";
 import Board from "./components/Board";
 import Form from "./components/Form";
-import { Hand } from "./components/Hand";
+import Hand from "./components/Hand";
 
 enum Screen {
   MENU,

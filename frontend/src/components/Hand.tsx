@@ -36,3 +36,5 @@ export const Hand: FC<HandProps> = ({ cards }) => {
     </StyledHand>
   );
 };
+
+export default Hand;

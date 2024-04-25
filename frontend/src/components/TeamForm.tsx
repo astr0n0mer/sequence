@@ -123,6 +123,7 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
                 name={`team-${team.id}-name`}
                 id={`team-${team.id}-name`}
                 defaultValue={team.name}
+                // onChange={(e) => [...localTeams, ]}
               />
             </label>
             <label>
@@ -141,7 +142,7 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
 
       <fieldset>
         <legend>Players</legend>
-        {localPlayers.map((player, index) => (
+        {localPlayers.map((player, playerIndex) => (
           <div key={player?.id}>
             <label>
               Player Name
@@ -149,7 +150,7 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
                 type="text"
                 name={`player-${player.id}-name`}
                 id={`player-${player.id}-name`}
-                defaultValue={`Player ${index + 1}`}
+                defaultValue={`Player ${playerIndex + 1}`}
               />
             </label>
 
@@ -159,8 +160,17 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
                 name={`player-${player.id}-team`}
                 id={`player-${player.id}-team`}
               >
-                {localTeams.map((team) => (
-                  <option key={team.id} value={team.id}>
+                {localTeams.map((team, teamIndex) => (
+                  <option
+                    key={team.id}
+                    value={team.id}
+                    selected={
+                      playerIndex >= teamIndex * numberOfPlayersPerTeam &&
+                      playerIndex <
+                        teamIndex * numberOfPlayersPerTeam +
+                          numberOfPlayersPerTeam
+                    }
+                  >
                     {team.name}
                   </option>
                 ))}

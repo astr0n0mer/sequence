@@ -3,6 +3,11 @@ export type Card = {
   suit: string;
 };
 
+export type CardOnBoard = Card & {
+  index: number;
+  chipColor: string | undefined;
+};
+
 export type PlayerCreate = {
   id: string;
   name: string;
@@ -18,5 +23,3 @@ export type Team = {
   players: Player[];
   chipColor: string;
 };
-
-export type CardOnBoard = Card & { chipColor: string | undefined };
