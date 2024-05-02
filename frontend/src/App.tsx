@@ -1,5 +1,11 @@
-import { createContext, useEffect, useState } from "react";
-import { PlayerEvent } from "../../common/enums";
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useEffect,
+  useState,
+} from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
   Card,
   CardOnBoard,
@@ -7,20 +13,18 @@ import {
   Team,
 } from "../../common/types";
 import "./App.css";
-import { Board } from "./components/Board";
 import { Form } from "./components/Form";
-import { Hand } from "./components/Hand";
-import {
-  createNewGame,
-  socketMessageHandlers,
-} from "./services/socket-helpers";
-import { Screen } from "./types";
+import { Game } from "./components/Game";
+import { GlobalContextType, GlobalStateType, Screen } from "./types";
 
-export const GlobalContext: React.Context<any> = createContext({}); // TODO: need to use better typing here instead of any
 const API_URL = import.meta.env.VITE_SEQUENCE_API_WEBSOCKET_URL;
+export const GlobalContext: React.Context<GlobalContextType> = createContext(
+  {} as GlobalContextType
+);
 
 function App() {
-  const [globalState, setGlobalState] = useState(() => ({
+  console.info("%cMounting App", "font-size: 1.5em");
+  const [globalState, setGlobalState] = useState<GlobalStateType>(() => ({
     // websocket: getWebSocket(API_URL),
     teams: [] as Team[],
     board: [] as CardOnBoard[],
@@ -28,91 +32,90 @@ function App() {
     chipColor: "",
     gameStatus: Screen.MENU,
   }));
-  const [event, setEvent] = useState<PlayerEvent>();
+  // const [event, setEvent] = useState<PlayerEvent>();
 
-  const getWebSocket = (url: string, setGlobalState: any) => {
+  const setupWebSocket = (
+    url: string,
+    setGlobalState: Dispatch<SetStateAction<GlobalStateType>>
+  ) => {
+    console.info("Getting web socket");
     const ws = new WebSocket(url);
 
     ws.onopen = (event) => {
-      console.info("Connected to server");
       console.info(event);
+      setGlobalState((prevGlobalState) => ({
+        ...prevGlobalState,
+        websocket: ws,
+      }));
+      console.info("%cConnected to server", "color: green");
     };
 
     ws.onclose = (event) => {
-      console.info("Connection closed");
+      // console.info("Connection closed");
       console.info(event);
     };
 
     ws.onerror = (event) => {
-      console.error("An error occurred");
-      console.info(event);
+      // console.error("An error occurred");
+      console.error(event);
     };
 
     ws.onmessage = (event) => {
-      console.info("Message arrived");
+      console.info("%cMessage arrived", "color: dodgerblue");
       console.info(event);
       const payload: ServerMessagePayload = JSON.parse(event.data);
-      const handler = socketMessageHandlers.get(payload.event);
+      setGlobalState((prevGlobalState) => ({
+        ...prevGlobalState,
+        ...payload.body,
+        serverEvent: payload.event,
+      }));
+      // const handler = socketMessageHandlers.get(payload.event);
 
-      if (!handler)
-        throw ReferenceError(
-          `No handler defined for server event: ${payload.event}`
-        );
+      // if (!handler)
+      //   throw ReferenceError(
+      //     `No handler defined for server event: ${payload.event}`
+      //   );
 
-      console.info({ body: payload.body, setGlobalState });
-      handler(payload.body, setGlobalState);
+      // console.info({ body: payload.body, setGlobalState });
+      // handler(payload.body, setGlobalState);
     };
 
-    return ws;
+    // return ws;
   };
 
   useEffect(() => {
-    setGlobalState((prevGlobalState) => ({
-      ...prevGlobalState,
-      websocket: getWebSocket(API_URL, setGlobalState),
-    }));
+    console.info("Making socket connection");
+    setupWebSocket(API_URL, setGlobalState);
+    // console.info({ websocket });
+    // setGlobalState((prevGlobalState) => ({ ...prevGlobalState, websocket }));
 
     return () => {
-      console.log("empty effect cleanup");
+      if (globalState.websocket) globalState.websocket.close();
     };
   }, []);
 
-  useEffect(() => {
-    console.info({ event });
-    if (event === undefined) return;
+  // useEffect(() => {
+  //   console.info({ event });
+  //   if (event === undefined) return;
 
-    if (event === PlayerEvent.CREATE_GAME) {
-      // we will have more event handlers here later
-      console.count("I'll be creating the game now");
-      createNewGame({ globalState, setGlobalState });
-    }
-    setEvent(() => undefined);
-  }, [event, setEvent]);
+  //   if (event === PlayerEvent.CREATE_GAME) {
+  //     // we will have more event handlers here later
+  //     console.count("I'll be creating the game now");
+  //     createNewGame({ globalState, setGlobalState });
+  //   }
+  //   setEvent(() => undefined);
+  // }, [event, setEvent]);
 
-  {
-    if (globalState.gameStatus === Screen.MENU) {
-      return (
-        <GlobalContext.Provider value={{ globalState, setGlobalState }}>
-          <Form setEvent={setEvent} />
-        </GlobalContext.Provider>
-      );
-    } else if (globalState.gameStatus === Screen.BOARD) {
-      return (
-        <>
-          <GlobalContext.Provider value={{ globalState, setGlobalState }}>
-            <Board />
-            <Hand />
-          </GlobalContext.Provider>
-        </>
-      );
-    } else {
-      return (
-        <h3>
-          Sequence is not available at the moment. Please check again later.
-        </h3>
-      );
-    }
-  }
+  return (
+    <BrowserRouter>
+      <GlobalContext.Provider value={{ globalState, setGlobalState }}>
+        <Routes>
+          <Route path="/" element={<Form />} />
+          <Route path="/games/:gameId" element={<Game />} />
+        </Routes>
+      </GlobalContext.Provider>
+    </BrowserRouter>
+  );
 }
 
 export default App;

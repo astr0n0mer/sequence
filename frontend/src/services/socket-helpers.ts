@@ -1,35 +1,33 @@
+import { Dispatch, SetStateAction } from "react";
 import { PlayerEvent, ServerEvent } from "../../../common/enums";
-import { Game, PlayerMessagePayload } from "../../../common/types";
-import { Screen } from "../types";
-
-export const handleGameCreated = (payloadData: Game, setState: any) => {
-  const { board, teams } = payloadData;
-  console.info(typeof setState);
-
-  setState((prevState: any) => ({
-    ...prevState,
-    board,
-    teams,
-    playerCards: teams[0].players[0].cards,
-    chipColor: teams[0].chipColor,
-    gameStatus: Screen.BOARD,
-  })); // TODO: use proper type here instead of any
-};
+import { PlayerMessagePayload } from "../../../common/types";
+import { GlobalStateType } from "../types";
 
 export const handlePlayerJoined = (payloadData: object) => {
   console.info(payloadData);
 };
 
 export const socketMessageHandlers: Map<ServerEvent, Function> = new Map([
-  [ServerEvent.GAME_CREATED, handleGameCreated],
+  //   [ServerEvent.GAME_CREATED, handleGameCreated],
   [ServerEvent.PLAYER_JOINED, handlePlayerJoined],
 ]);
 
-export const createNewGame = ({ globalState, setGlobalState }) => {
+export const createNewGame = ({
+  globalState,
+  setGlobalState,
+}: {
+  globalState: GlobalStateType;
+  setGlobalState: Dispatch<SetStateAction<GlobalStateType>>;
+}) => {
   const { teams } = globalState;
 
   console.log("about to submit create game message");
   const { websocket } = globalState;
+  if (!websocket) {
+    console.error("No connection found");
+    return;
+  }
+
   if (websocket.readyState === WebSocket.OPEN) {
     const payload: PlayerMessagePayload = {
       event: PlayerEvent.CREATE_GAME,

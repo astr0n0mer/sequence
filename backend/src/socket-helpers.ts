@@ -1,10 +1,10 @@
 import WebSocket from "ws";
 import { PlayerEvent, ServerEvent } from "../../common/enums";
 import { Team } from "../../common/types";
-import { dealer } from "./main";
+import { dealer, wss } from "./main";
 
 export const handleOnConnection = (ws: WebSocket) => {
-  console.count("Connection established");
+  console.log(`+ connected users: ${wss.clients.size}`);
   // inform all players that someone joined
   //   wss.clients.forEach((client) => {
   //     if (client === ws) return;
@@ -21,7 +21,7 @@ export const handleOnConnection = (ws: WebSocket) => {
 };
 
 export const handleOnClose = (event: WebSocket.CloseEvent) => {
-  console.count("Connection closed");
+  console.log(`- connected users: ${wss.clients.size}`);
   // inform all players that someone left
   //   wss.clients.forEach((client) => {
   //     if (client === event.target) return;
@@ -37,11 +37,15 @@ export const handleOnClose = (event: WebSocket.CloseEvent) => {
 };
 
 export const handleCreateGame = (payloadData: any) => {
-  console.log("handleCreateGame", payloadData);
+  // console.log("handleCreateGame", payloadData);
   const teams: Team[] = payloadData.teams;
   // console.log(teams);
-  for (let team of teams) for (let player of team.players) console.log(player);
+  // for (let team of teams) for (let player of team.players) console.log(player);
   const game = dealer.startNewGame(teams);
+  // console.log(game.teams);
+  // game.teams.forEach((team) =>
+  //   console.log(JSON.stringify(team.players, null, 2))
+  // );
   return { event: ServerEvent.GAME_CREATED, body: game };
 };
 

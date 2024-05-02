@@ -1,16 +1,14 @@
-import { Dispatch, FC, SetStateAction, useContext, useRef } from "react";
+import { FC, useContext, useRef } from "react";
 import { PlayerEvent } from "../../../common/enums";
 import { Team } from "../../../common/types";
 import { GlobalContext } from "../App";
 
 export type IndividualFormProps = {
   numberOfPlayers: number | null;
-  setEvent: Dispatch<SetStateAction<PlayerEvent | undefined>>;
 };
 
 export const IndividualForm: FC<IndividualFormProps> = ({
   numberOfPlayers,
-  setEvent,
 }) => {
   if (!numberOfPlayers) return;
   const { globalState, setGlobalState } = useContext(GlobalContext);
@@ -42,12 +40,13 @@ export const IndividualForm: FC<IndividualFormProps> = ({
       return team;
     });
 
-    setGlobalState((prevGlobalState: any) => ({
+    setGlobalState((prevGlobalState) => ({
       ...prevGlobalState,
       teams: localTeams,
+      playerEvent: PlayerEvent.CREATE_GAME,
     }));
 
-    setEvent(() => PlayerEvent.CREATE_GAME);
+    console.info("Submitting indi form");
   };
 
   return (

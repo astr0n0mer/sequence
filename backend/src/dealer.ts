@@ -3,7 +3,7 @@ import { CardValue } from "../../common/enums";
 import { Board, Card, Game, Team } from "../../common/types";
 
 // "jack" is not a valid card on a sequence board
-const excludeList: Card[] = Deck.suits.map((suit) => ({
+const jacksOfAllSuits: Card[] = Deck.suits.map((suit) => ({
   value: CardValue.JACK,
   suit,
 }));
@@ -13,9 +13,9 @@ export class Dealer {
   private activeGames: Map<typeof Dealer.gameId, Game> = new Map();
 
   public startNewGame = (teams: Team[]): Game => {
-    const newBoard: Board = new Deck(excludeList)
+    const newBoard: Board = new Deck(jacksOfAllSuits)
       .getCards()
-      .concat(new Deck(excludeList).getCards())
+      .concat(new Deck(jacksOfAllSuits).getCards())
       // .map((card, index) => ({ ...card, index, chipColor: undefined }));
       .map((card, index) => ({ ...card, index }));
 
@@ -53,4 +53,12 @@ export class Dealer {
 
   public dealCard = (gameId: typeof Dealer.gameId) =>
     this.activeGames.get(gameId)?.deck.dealCard();
+
+  public get gameId(): typeof Dealer.gameId {
+    return Dealer.gameId;
+  }
+
+  public get getActiveGames(): typeof this.activeGames {
+    return this.activeGames;
+  }
 }

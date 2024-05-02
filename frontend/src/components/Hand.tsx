@@ -15,6 +15,9 @@ const StyledCard = styled.button`
   & > img {
     height: 100%;
   }
+
+  // TODO: remove this later, just added for simulating dark mode
+  filter: invert(0.9);
 `;
 
 export const Hand: FC = () => {
@@ -26,7 +29,7 @@ export const Hand: FC = () => {
       {playerCards.map((card, index) => (
         <StyledCard key={index}>
           <img
-            src={`./src/assets/deck/${card.value}_of_${card.suit}${
+            src={`../src/assets/deck/${card.value}_of_${card.suit}${
               ["king", "queen", "jack"].includes(card.value) ? "2" : ""
             }.svg`}
             alt={`${card.value}_of_${card.suit}`}

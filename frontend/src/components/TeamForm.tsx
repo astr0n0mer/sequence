@@ -1,21 +1,13 @@
-import {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+import { FC, useContext, useRef, useState } from "react";
 import { PlayerEvent } from "../../../common/enums";
 import { Player, Team } from "../../../common/types";
 import { GlobalContext } from "../App";
 
 export type TeamFormProps = {
   numberOfTeams: number | null;
-  setEvent: Dispatch<SetStateAction<PlayerEvent | undefined>>;
 };
 
-export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setEvent }) => {
+export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams }) => {
   if (!numberOfTeams) return;
 
   const { globalState, setGlobalState } = useContext(GlobalContext);
@@ -53,7 +45,6 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setEvent }) => {
   // @ts-ignore
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    // console.info(event);
 
     validateSubmittedForm();
 
@@ -93,12 +84,13 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setEvent }) => {
       return finalTeam;
     });
 
-    setGlobalState((prevGlobalState: any) => ({
+    setGlobalState((prevGlobalState) => ({
       ...prevGlobalState,
       teams: finalTeams,
+      playerEvent: PlayerEvent.CREATE_GAME,
     }));
 
-    setEvent(() => PlayerEvent.CREATE_GAME);
+    console.info("Submitting team form");
   };
 
   return (

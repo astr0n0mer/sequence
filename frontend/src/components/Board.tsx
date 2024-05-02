@@ -38,6 +38,7 @@ const StyledBoard = styled.main`
 
 type StyledButtonProps = {
   $isPlayerCard: boolean;
+  $playerChipColor: string;
   $chipColor: string | undefined;
 };
 
@@ -53,8 +54,11 @@ const StyledButton = styled.div<StyledButtonProps>`
   margin-bottom: -4px;
   //   height: calc(100% - 4px);
 
-  outline: ${({ $isPlayerCard, $chipColor }) =>
-    $isPlayerCard && !$chipColor ? `4px solid #3688ed` : "unset"};
+  outline: ${({ $isPlayerCard, $chipColor, $playerChipColor }) =>
+    $isPlayerCard && !$chipColor ? `4px solid ${$playerChipColor}` : "unset"};
+
+  // TODO: remove this later, just added for simulating dark mode
+  filter: invert(0.9);
 `;
 
 const CardImg = styled.img`
@@ -131,13 +135,14 @@ export const Board: FC = () => {
               isPlayerCard ? () => handleCardOnBoardClick(card) : undefined
             }
             $isPlayerCard={isPlayerCard}
+            $playerChipColor={chipColor}
             $chipColor={card.chipColor}
           >
             <CardImg
               src={
                 card.value.toString() === "*" // TODO: remove toString from here later, instead the type should be Array<Card | Wildcard>
-                  ? "./src/assets/deck/black_joker.svg"
-                  : `./src/assets/deck/${card.value}_of_${card.suit}${
+                  ? "../src/assets/deck/black_joker.svg"
+                  : `../src/assets/deck/${card.value}_of_${card.suit}${
                       ["king", "queen", "jack"].includes(card.value) ? "2" : ""
                     }.svg`
                 // : `./src/assets/deck/${card.value}_of_${card.suit}.svg`

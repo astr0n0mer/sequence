@@ -46,6 +46,8 @@ wss.on("connection", (ws) => {
 
     const response = handler(payload.body);
     ws.send(JSON.stringify(response));
+
+    console.log("Active games:", dealer.getActiveGames.size);
   };
 
   ws.onclose = handleOnClose;
