@@ -1,27 +1,23 @@
 import { Deck } from "../../common/deck";
-import { Card, CardOnBoard, Team } from "../../common/types";
-
-type Game = {
-  gameId: string;
-  deck: Deck;
-  board: Card[];
-  teams: Team[];
-  //   players: Array<PlayerCreate & { cards: Card[] }>;
-};
+import { CardValue } from "../../common/enums";
+import { Board, Card, Game, Team } from "../../common/types";
 
 // "jack" is not a valid card on a sequence board
-const excludeList: Card[] = Deck.suits.map((suit) => ({ value: "jack", suit }));
+const excludeList: Card[] = Deck.suits.map((suit) => ({
+  value: CardValue.JACK,
+  suit,
+}));
 
 export class Dealer {
-  // @ts-ignore
-  private games: { gameId: string; game: Game } = {};
   private static gameId = 1;
+  private activeGames: Map<typeof Dealer.gameId, Game> = new Map();
 
-  public startNewGame = (teams: Team[]) => {
-    const newBoard: CardOnBoard[] = new Deck(excludeList)
+  public startNewGame = (teams: Team[]): Game => {
+    const newBoard: Board = new Deck(excludeList)
       .getCards()
       .concat(new Deck(excludeList).getCards())
-      .map((card, index) => ({ ...card, index, chipColor: undefined }));
+      // .map((card, index) => ({ ...card, index, chipColor: undefined }));
+      .map((card, index) => ({ ...card, index }));
 
     for (let i of [0, 9, 90, 99]) {
       newBoard.splice(i, 0, {
@@ -33,9 +29,10 @@ export class Dealer {
     }
 
     const deckWithDealer = new Deck();
+    const numberOfCardsWithEachPlayer = 4;
 
     // assign cards to teams
-    for (let _ = 0; _ < 4; _++) {
+    for (let _ = 0; _ < numberOfCardsWithEachPlayer; _++) {
       for (let i = 0; i < teams[0].players.length; i++) {
         for (let j = 0; j < teams.length; j++) {
           teams[j].players[i].cards.push(deckWithDealer.dealCard());
@@ -49,13 +46,11 @@ export class Dealer {
       board: newBoard,
       teams: teams,
     };
-    // @ts-ignore
-    this.games[Dealer.gameId.toString()] = newGame;
-    Dealer.gameId++;
 
+    this.activeGames.set(Dealer.gameId++, newGame);
     return newGame;
   };
 
-  // @ts-ignore
-  public dealCard = (gameId: string) => this.games[gameId].deck.dealCard();
+  public dealCard = (gameId: typeof Dealer.gameId) =>
+    this.activeGames.get(gameId)?.deck.dealCard();
 }

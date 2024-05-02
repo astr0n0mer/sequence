@@ -1,15 +1,15 @@
 import { Dispatch, FC, SetStateAction, useState } from "react";
-import { Team } from "../../../common/types";
+import { PlayerEvent } from "../../../common/enums";
 import IndividualForm from "./IndividualForm";
 import TeamForm from "./TeamForm";
 
 type GameMode = "individual" | "team";
 
 type FormProps = {
-  setTeams: Dispatch<SetStateAction<Team[]>>;
+  setEvent: Dispatch<SetStateAction<PlayerEvent | undefined>>;
 };
 
-export const Form: FC<FormProps> = ({ setTeams }) => {
+export const Form: FC<FormProps> = ({ setEvent }) => {
   const [gameMode, setGameMode] = useState<GameMode>("individual");
   const [numberOfEntities, setNumberOfEntities] = useState(2);
 
@@ -54,10 +54,10 @@ export const Form: FC<FormProps> = ({ setTeams }) => {
       {gameMode === "individual" ? (
         <IndividualForm
           numberOfPlayers={numberOfEntities}
-          setTeams={setTeams}
+          setEvent={setEvent}
         />
       ) : (
-        <TeamForm numberOfTeams={numberOfEntities} setTeams={setTeams} />
+        <TeamForm numberOfTeams={numberOfEntities} setEvent={setEvent} />
       )}
     </section>
   );

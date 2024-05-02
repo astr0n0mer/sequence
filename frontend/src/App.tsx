@@ -1,63 +1,108 @@
-import { useEffect, useState } from "react";
-import { Card, CardOnBoard, Team } from "../../common/types";
+import { createContext, useEffect, useState } from "react";
+import { PlayerEvent } from "../../common/enums";
+import {
+  Card,
+  CardOnBoard,
+  ServerMessagePayload,
+  Team,
+} from "../../common/types";
 import "./App.css";
-import Board from "./components/Board";
-import Form from "./components/Form";
-import Hand from "./components/Hand";
+import { Board } from "./components/Board";
+import { Form } from "./components/Form";
+import { Hand } from "./components/Hand";
+import {
+  createNewGame,
+  socketMessageHandlers,
+} from "./services/socket-helpers";
+import { Screen } from "./types";
 
-enum Screen {
-  MENU,
-  BOARD,
-}
-
-const API_URL = import.meta.env.VITE_SEQUENCE_API_URL;
+export const GlobalContext: React.Context<any> = createContext({}); // TODO: need to use better typing here instead of any
+const API_URL = import.meta.env.VITE_SEQUENCE_API_WEBSOCKET_URL;
 
 function App() {
-  const [gameStatus, setGameStatus] = useState(Screen.MENU);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [board, setBoard] = useState<CardOnBoard[]>([]);
-  const [playerCards, setPlayerCards] = useState<Card[]>([]);
-  const [chipColor, setChipColor] = useState<string>("");
+  const [globalState, setGlobalState] = useState(() => ({
+    // websocket: getWebSocket(API_URL),
+    teams: [] as Team[],
+    board: [] as CardOnBoard[],
+    playerCards: [] as Card[],
+    chipColor: "",
+    gameStatus: Screen.MENU,
+  }));
+  const [event, setEvent] = useState<PlayerEvent>();
 
-  const startNewGame = async () => {
-    const response = await fetch(`${API_URL}/v1/games`, {
-      method: "POST",
-      body: JSON.stringify({ teams }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
+  const getWebSocket = (url: string, setGlobalState: any) => {
+    const ws = new WebSocket(url);
 
-    console.info(data.board);
-    console.info(data.teams);
+    ws.onopen = (event) => {
+      console.info("Connected to server");
+      console.info(event);
+    };
 
-    setBoard(() => data.board);
-    setPlayerCards(() => data.teams[0].players[0].cards);
-    setChipColor(() => teams[0].chipColor);
-    setGameStatus(() => Screen.BOARD);
+    ws.onclose = (event) => {
+      console.info("Connection closed");
+      console.info(event);
+    };
+
+    ws.onerror = (event) => {
+      console.error("An error occurred");
+      console.info(event);
+    };
+
+    ws.onmessage = (event) => {
+      console.info("Message arrived");
+      console.info(event);
+      const payload: ServerMessagePayload = JSON.parse(event.data);
+      const handler = socketMessageHandlers.get(payload.event);
+
+      if (!handler)
+        throw ReferenceError(
+          `No handler defined for server event: ${payload.event}`
+        );
+
+      console.info({ body: payload.body, setGlobalState });
+      handler(payload.body, setGlobalState);
+    };
+
+    return ws;
   };
 
   useEffect(() => {
-    console.count("Teams changed");
-    console.table(teams);
+    setGlobalState((prevGlobalState) => ({
+      ...prevGlobalState,
+      websocket: getWebSocket(API_URL, setGlobalState),
+    }));
 
-    // TODO: ideally this check should not be needed, find out why it is needed
-    if (teams.length === 0) return;
-    startNewGame();
-  }, [teams]);
+    return () => {
+      console.log("empty effect cleanup");
+    };
+  }, []);
+
+  useEffect(() => {
+    console.info({ event });
+    if (event === undefined) return;
+
+    if (event === PlayerEvent.CREATE_GAME) {
+      // we will have more event handlers here later
+      console.count("I'll be creating the game now");
+      createNewGame({ globalState, setGlobalState });
+    }
+    setEvent(() => undefined);
+  }, [event, setEvent]);
 
   {
-    if (gameStatus === Screen.MENU) {
-      return <Form setTeams={setTeams} />;
-    } else if (gameStatus === Screen.BOARD) {
+    if (globalState.gameStatus === Screen.MENU) {
+      return (
+        <GlobalContext.Provider value={{ globalState, setGlobalState }}>
+          <Form setEvent={setEvent} />
+        </GlobalContext.Provider>
+      );
+    } else if (globalState.gameStatus === Screen.BOARD) {
       return (
         <>
-          <Board
-            board={board}
-            setBoard={setBoard}
-            playerCards={playerCards}
-            chipColor={chipColor}
-          />
-          <Hand cards={playerCards} />
+          <GlobalContext.Provider value={{ globalState, setGlobalState }}>
+            <Board />
+            <Hand />
+          </GlobalContext.Provider>
         </>
       );
     } else {

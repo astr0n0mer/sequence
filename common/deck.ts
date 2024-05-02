@@ -1,22 +1,29 @@
+import { CardValue, Suit } from "./enums";
 import { Card } from "./types";
 
 export class Deck {
   private cards: Card[] = [];
-  public static suits = ["clubs", "diamonds", "hearts", "spades"];
-  public static values = [
-    "ace",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "king",
-    "queen",
-    "jack",
+  // https://blog.logrocket.com/iterate-over-enums-typescript#inbuilt-object-methods
+  public static suits: Suit[] = [
+    Suit.CLUBS,
+    Suit.DIAMONDS,
+    Suit.HEARTS,
+    Suit.SPADES,
+  ];
+  public static values: CardValue[] = [
+    CardValue.ACE,
+    CardValue.TWO,
+    CardValue.THREE,
+    CardValue.FOUR,
+    CardValue.FIVE,
+    CardValue.SIX,
+    CardValue.SEVEN,
+    CardValue.EIGHT,
+    CardValue.NINE,
+    CardValue.TEN,
+    CardValue.KING,
+    CardValue.QUEEN,
+    CardValue.JACK,
   ];
 
   constructor(excludeList: Card[] = []) {

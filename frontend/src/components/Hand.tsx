@@ -1,10 +1,7 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import styled from "styled-components";
 import { Card } from "../../../common/types";
-
-export type HandProps = {
-  cards: Card[];
-};
+import { GlobalContext } from "../App";
 
 const StyledHand = styled.section`
   display: grid;
@@ -20,10 +17,13 @@ const StyledCard = styled.button`
   }
 `;
 
-export const Hand: FC<HandProps> = ({ cards }) => {
+export const Hand: FC = () => {
+  const { globalState } = useContext(GlobalContext);
+  const { playerCards }: { playerCards: Card[] } = globalState; // TODO: maybe I can remove this explicit typing from here
+
   return (
     <StyledHand>
-      {cards.map((card, index) => (
+      {playerCards.map((card, index) => (
         <StyledCard key={index}>
           <img
             src={`./src/assets/deck/${card.value}_of_${card.suit}${

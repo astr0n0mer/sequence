@@ -1,13 +1,24 @@
-import { Dispatch, FC, SetStateAction, useRef, useState } from "react";
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { PlayerEvent } from "../../../common/enums";
 import { Player, Team } from "../../../common/types";
+import { GlobalContext } from "../App";
 
 export type TeamFormProps = {
   numberOfTeams: number | null;
-  setTeams: Dispatch<SetStateAction<Team[]>>;
+  setEvent: Dispatch<SetStateAction<PlayerEvent | undefined>>;
 };
 
-export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
+export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setEvent }) => {
   if (!numberOfTeams) return;
+
+  const { globalState, setGlobalState } = useContext(GlobalContext);
 
   const teamIdRef = useRef(1e5);
   const playerIdRef = useRef(1e2);
@@ -82,8 +93,12 @@ export const TeamForm: FC<TeamFormProps> = ({ numberOfTeams, setTeams }) => {
       return finalTeam;
     });
 
-    // console.table(finalTeams);
-    setTeams(() => finalTeams);
+    setGlobalState((prevGlobalState: any) => ({
+      ...prevGlobalState,
+      teams: finalTeams,
+    }));
+
+    setEvent(() => PlayerEvent.CREATE_GAME);
   };
 
   return (

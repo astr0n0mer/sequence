@@ -1,16 +1,19 @@
-import { Dispatch, FC, SetStateAction, useRef } from "react";
+import { Dispatch, FC, SetStateAction, useContext, useRef } from "react";
+import { PlayerEvent } from "../../../common/enums";
 import { Team } from "../../../common/types";
+import { GlobalContext } from "../App";
 
 export type IndividualFormProps = {
   numberOfPlayers: number | null;
-  setTeams: Dispatch<SetStateAction<Team[]>>;
+  setEvent: Dispatch<SetStateAction<PlayerEvent | undefined>>;
 };
 
 export const IndividualForm: FC<IndividualFormProps> = ({
   numberOfPlayers,
-  setTeams,
+  setEvent,
 }) => {
   if (!numberOfPlayers) return;
+  const { globalState, setGlobalState } = useContext(GlobalContext);
 
   const playerIdRef = useRef(1e2);
   const localPlayers = new Array(numberOfPlayers)
@@ -24,13 +27,9 @@ export const IndividualForm: FC<IndividualFormProps> = ({
         "#" + (Date.now() - index * 24 * 60 * 60 * 1000).toString(16).slice(-6),
     }));
 
-  //   console.info({ numberOfPlayers, playerIds: localPlayers });
-  //   console.table(localPlayers);
-
   // @ts-ignore
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    // console.info(event);
 
     const formData = new FormData(event.target);
     const localTeams: Team[] = localPlayers.map((player) => {
@@ -42,10 +41,13 @@ export const IndividualForm: FC<IndividualFormProps> = ({
       };
       return team;
     });
-    // console.info(formData);
-    // console.info(formData.get("player-101-name"));
-    // console.table(localTeams);
-    setTeams(() => localTeams);
+
+    setGlobalState((prevGlobalState: any) => ({
+      ...prevGlobalState,
+      teams: localTeams,
+    }));
+
+    setEvent(() => PlayerEvent.CREATE_GAME);
   };
 
   return (

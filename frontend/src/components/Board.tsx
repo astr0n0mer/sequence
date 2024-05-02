@@ -1,9 +1,8 @@
-import { Dispatch, FC, SetStateAction } from "react";
-// import deckFolder from "../assets/deck";
+import { FC, useContext } from "react";
 import styled from "styled-components";
 import { CardOnBoard } from "../../../common/types";
+import { GlobalContext } from "../App";
 import "../App.css";
-import { Card } from "../services/deck";
 
 const wildCardChipColor = `
     conic-gradient(
@@ -98,29 +97,21 @@ const Chip = styled.div`
   }}
 `;
 
-export type BoardProps = {
-  board: CardOnBoard[];
-  setBoard: Dispatch<SetStateAction<CardOnBoard[]>>;
-  playerCards: Card[];
-  chipColor: string;
-};
+export const Board: FC = () => {
+  const { globalState, setGlobalState } = useContext(GlobalContext);
+  const { board, playerCards, chipColor } = globalState;
 
-export const Board: FC<BoardProps> = ({
-  board,
-  setBoard,
-  playerCards,
-  chipColor,
-}) => {
   const handleCardOnBoardClick = ({ value, suit, index }: CardOnBoard) => {
-    setBoard((prevBoard) =>
-      prevBoard.map((card) => ({
+    setGlobalState((prevGlobalState) => ({
+      ...prevGlobalState,
+      board: prevGlobalState.board.map((card) => ({
         ...card,
         chipColor:
           card.index === index && card.value === value && card.suit === suit
             ? chipColor
             : card.chipColor,
-      }))
-    );
+      })),
+    }));
   };
 
   return (
@@ -144,7 +135,7 @@ export const Board: FC<BoardProps> = ({
           >
             <CardImg
               src={
-                card.value === "*"
+                card.value.toString() === "*" // TODO: remove toString from here later, instead the type should be Array<Card | Wildcard>
                   ? "./src/assets/deck/black_joker.svg"
                   : `./src/assets/deck/${card.value}_of_${card.suit}${
                       ["king", "queen", "jack"].includes(card.value) ? "2" : ""

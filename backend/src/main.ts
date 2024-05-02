@@ -1,9 +1,20 @@
 import cors from "cors";
-import express, { Request, Response } from "express";
+import express from "express";
+import http from "http";
+import WebSocket from "ws";
+import { PlayerMessagePayload } from "../../common/types";
 import { Dealer } from "./dealer";
+import {
+  handleOnClose,
+  handleOnConnection,
+  socketMessageHandlers,
+} from "./socket-helpers";
 
-// Create Express server
+const PORT = process.env.PORT || 3000;
 const app = express();
+const server = http.createServer(app);
+export const wss = new WebSocket.Server({ server });
+export const dealer = new Dealer();
 
 const corsOptions = {
   origin: "*",
@@ -13,28 +24,33 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-const dealer = new Dealer();
 
-app.get("/v1/games", (req: Request, res: Response) => {
-  const response = {
-    message: "Hello, World! How are you",
+// const messageActionMap: Map<PlayerAction, Function> = new Map([
+//   [PlayerAction.CREATE_GAME, createNewGame],
+// ]);
+
+wss.on("connection", (ws) => {
+  handleOnConnection(ws);
+
+  ws.onmessage = (event) => {
+    console.log("got message");
+    const payload: PlayerMessagePayload = JSON.parse(
+      event.data.toString("utf-8")
+    );
+    const handler = socketMessageHandlers.get(payload.event);
+
+    if (!handler)
+      throw ReferenceError(
+        `No handler defined for player event: ${payload.event}`
+      );
+
+    const response = handler(payload.body);
+    ws.send(JSON.stringify(response));
   };
-  // console.log(req.body);
-  res.json(response);
+
+  ws.onclose = handleOnClose;
 });
 
-app.post("/v1/games", (req: Request, res: Response) => {
-  const teams = req.body.teams;
-  console.log(teams);
-  for (let team of teams) for (let player of team.players) console.log(player);
-  const game = dealer.startNewGame(teams);
-  res.json(game);
-});
-
-// Define the port to run the server on
-const PORT = process.env.PORT || 3000;
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });
